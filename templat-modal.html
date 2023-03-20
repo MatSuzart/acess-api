@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+  <title>Tabela de Produtos</title>
+</head>
+
+<body>
+  <h1>Tabela de Produtos</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Linha</th>
+        <th>Potência</th>
+        <th>Conjunto Ótico</th>
+        <th>Temperatura de Cor</th>
+        <th>Cor de Pintura</th>
+        <th>Fixação</th>
+        <th>Adicionais</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-produtos"></tbody>
+  </table>
+
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalProduto">
+    Incluir Produto
+  </button>
+
+  <div class="modal fade" id="modalProduto" tabindex="-1" role="dialog" aria-labelledby="modalProdutoTitle"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalProdutoTitle">Cadastrar Produto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-produto">
+            <div class="form-group">
+              <label for="linha">Linha:</label>
+              <input type="text" class="form-control" id="linha" name="linha" />
+            </div>
+            <div class="form-group">
+              <label for="potencia">Potência:</label>
+              <input type="number" class="form-control" id="potencia" name="potencia" />
+            </div>
+            <div class="form-group">
+              <label for="conjunto-otico">Conjunto Ótico:</label>
+              <input type="text" class="form-control" id="conjunto-otico" name="conjunto-otico" />
+            </div>
+            <div class="form-group">
+              <label for="temperatura-de-cor">Temperatura de Cor:</label>
+              <input type="text" class="form-control" id="temperatura-de-cor" name="temperatura-de-cor" />
+            </div>
+            <div class="form-group">
+              <label for="cor-de-pintura">Cor de Pintura:</label>
+              <input type="text" class="form-control" id="cor-de-pintura" name="cor-de-pintura" />
+            </div>
+            <div class="form-group">
+              <label for="fixacao">Fixação:</label>
+              <input type="text" class="form-control" id="fixacao" name="fixacao" />
+            </div>
+            <div class="form-group">
+              <label for="adicionais">Adicionais:</label>
+              <input type="text" class="form-control" id="adicionais" name="adicionais" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" onclick="salvarProduto()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function carregarProdutos() {
+      const tabelaProdutos = document.getElementById("tabela-produtos");
+      tabelaProdutos.innerHTML = "";
+      fetch("http://localhost:8000/products")
+        .then((response) => response.json())
+        .then((data) => {
+          data.forEach((produto) => {
+            tabelaProdutos.innerHTML += `
+                        <tr>
+                          <td>${produto.linha}</td>
+                          <td>${produto.potencia}</td>
+                          <td>${produto.conjunto_otico}</td>
+                          <td>${produto.temperatura_de_cor}</td>
+                          <td>${produto.cor_de_pintura}</td>
+                          <td>${produto.fixacao}</td>
+                          <td>${produto.adicionais}</td>
+                        </tr>
+                      `;
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+
+    function salvarProduto() {
+      const formProduto = document.getElementById("form-produto");
+      const linha = formProduto.linha.value;
+      const potencia = formProduto.potencia.value;
+      const conjunto_otico = formProduto.conjunto_otico.value;
+      const temperatura_de_cor = formProduto.temperatura_de_cor.value;
+      const cor_de_pintura = formProduto.cor_de_pintura.value;
+      const fixacao = formProduto.fixacao.value;
+      const adicionais = formProduto.adicionais.value;
+      const produto = {
+        linha,
+        potencia,
+        conjunto_otico,
+        temperatura_de_cor,
+        cor_de_pintura,
+        fixacao,
+        adicionais,
+      };
+      fetch("http://localhost:8000/products/adiciona", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(produto),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          carregarProdutos();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      formProduto.reset();
+      $("#modalProduto").modal("hide");
+    }
+
+    carregarProdutos();
+  </script>
